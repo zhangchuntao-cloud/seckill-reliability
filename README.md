@@ -62,16 +62,30 @@ Spring Boot 3.2 · JDK 17 · MySQL 8 · Redis · RabbitMQ · MyBatis-Plus · Red
 ## 快速开始
 
 ```bash
-# 1. 一键起中间件（MySQL / Redis / RabbitMQ / Prometheus / Grafana）
+./hmdp.sh start
+```
+
+一条命令完成：检查 JDK 17 / Docker → 启动 5 个中间件 → 等待就绪 →
+打包应用 → 启动并健康检查 → 打印访问地址。
+
+| 命令 | 作用 |
+|---|---|
+| `./hmdp.sh start` | 一键启动（幂等，重复执行不会起第二份） |
+| `./hmdp.sh stop` | 停止应用和中间件（保留数据） |
+| `./hmdp.sh status` | 查看应用与各组件状态 |
+| `./hmdp.sh logs` | 跟踪应用日志 |
+| `./hmdp.sh restart` | 重启 |
+| `./hmdp.sh build` | 改完 Java 代码后重新打包 |
+| `./hmdp.sh clean` | 停止并清空数据卷（下次启动重新导入建表脚本） |
+
+### 手动启动（不想用脚本时）
+
+```bash
+# 1. 起中间件（MySQL / Redis / RabbitMQ / Prometheus / Grafana）
 docker compose up -d
 
 # 2. 启动应用（需 JDK 17）
 mvn spring-boot:run
-
-# 3. 访问
-#    应用      http://localhost:8081
-#    监控大盘   http://localhost:3000/d/hmdp-seckill
-#    Prometheus http://localhost:9090
 ```
 
 构建时若默认 JDK 不是 17，需显式指定：
@@ -79,6 +93,14 @@ mvn spring-boot:run
 ```bash
 JAVA_HOME=/path/to/jdk17 mvn spring-boot:run
 ```
+
+### 访问
+
+| | 地址 |
+|---|---|
+| 应用 | http://localhost:8081 |
+| 监控大盘 | http://localhost:3000/d/hmdp-seckill |
+| Prometheus | http://localhost:9090 |
 
 ## 压测
 

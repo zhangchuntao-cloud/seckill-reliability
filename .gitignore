@@ -27,3 +27,6 @@ src/test/resources/tokens.txt
 
 # 上传的图片
 uploads/
+
+# 一键脚本的运行态（PID、日志）
+.run/
