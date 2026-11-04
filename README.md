@@ -102,7 +102,7 @@ JAVA_HOME=/path/to/jdk17 mvn spring-boot:run
 
 | | 地址 |
 |---|---|
-| 应用 | http://localhost:8081 |
+| **项目首页**（实时指标 + 入口导航） | **http://localhost:8081** |
 | 监控大盘 | http://localhost:3000/d/hmdp-seckill |
 | Prometheus | http://localhost:9090 |
 
