@@ -19,6 +19,12 @@ public class MvcConfig implements WebMvcConfigurer {
         //登录拦截器
         registry.addInterceptor(new LoginInterceptor())
                 .excludePathPatterns(
+                        // 项目首页与静态资源。没有这条，打开 http://localhost:8081
+                        // 会被登录拦截器拦下返回 401（浏览器显示空白），
+                        // 而不是预期的首页。
+                        "/",
+                        "/index.html",
+                        "/favicon.ico",
                         "/user/login",
                         "/upload/**",
                         // 注意：/voucher/** 仍然放行，因为其中的 GET /voucher/list/{shopId}
