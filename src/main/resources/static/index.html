@@ -135,7 +135,7 @@
       <div class="note">重试耗尽，需人工介入</div>
     </div>
     <div class="card">
-      <div class="label">Lua 预检 P99</div>
+      <div class="label">Lua 预检平均耗时</div>
       <div class="value" id="m-lua">—</div>
       <div class="note">请求线程上唯一的 Redis 往返</div>
     </div>
@@ -237,18 +237,23 @@
 
   // 从 Prometheus 文本格式里取指标值
   function parseMetrics(text) {
-    var map = {};
+    var exact = {};   // 精确 key（含标签）-> 值
+    var byName = {};  // 指标名 -> 各标签组合之和
     text.split('\n').forEach(function (line) {
       if (!line || line.charAt(0) === '#') return;
       var m = line.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{[^}]*\})?\s+([0-9.eE+-]+)$/);
       if (!m) return;
       var name = m[1], labels = m[2] || '', value = parseFloat(m[3]);
-      var key = name + labels;
-      map[key] = value;
-      // 同名指标累加（多个标签组合）
-      map[name] = (map[name] || 0) + value;
+      exact[name + labels] = value;
+      byName[name] = (byName[name] || 0) + value;
     });
-    return map;
+    // 无标签的指标，exact 里已经有同名 key；有标签的才需要用累加值兜底。
+    // 注意不能写成 map[name] = (map[name] || 0) + value 然后同时保留 map[name] = value——
+    // 无标签时 key 与 name 相同，会被算两遍。
+    Object.keys(byName).forEach(function (name) {
+      if (!(name in exact)) exact[name] = byName[name];
+    });
+    return exact;
   }
 
   function refreshMetrics() {
@@ -275,7 +280,11 @@
         setText('m-dlq', fmt(dlq));
         document.getElementById('m-dlq').className = 'value' + (dlq > 0 ? ' red' : ' green');
 
-        setText('m-lua', fmtSeconds(m['seckill_lua_duration_seconds_max']));
+        // 平均耗时 = 总耗时 / 调用次数。
+        // 注意不要用 _max —— 它是最坏值（含首次连接的冷启动），不是 P99。
+        var luaSum = m['seckill_lua_duration_seconds_sum'] || 0;
+        var luaCount = m['seckill_lua_duration_seconds_count'] || 0;
+        setText('m-lua', luaCount > 0 ? fmtSeconds(luaSum / luaCount) : '—');
       })
       .catch(function () {
         ['m-total','m-success','m-oos','m-error','m-created','m-dupe','m-dlq','m-lua']

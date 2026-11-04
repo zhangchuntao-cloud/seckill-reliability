@@ -155,8 +155,11 @@ start_infra() {
 
 build_app() {
     if [[ -f "$JAR" && "${1:-}" != "--force" ]]; then
-        # 源码比 jar 新就重新打包
-        if [[ -z "$(find src -newer "$JAR" -name '*.java' -o -newer "$JAR" -name '*.yaml' 2>/dev/null | head -1)" ]]; then
+        # 源码比 jar 新就重新打包。
+        # 注意要覆盖 src 下的**所有**文件，不能只盯 *.java / *.yaml ——
+        # 静态资源（index.html）、Lua 脚本、SQL、配置都在 src 里，
+        # 漏掉它们会导致"改了却跑的还是旧 jar"。
+        if [[ -z "$(find src pom.xml -newer "$JAR" -type f 2>/dev/null | head -1)" ]]; then
             ok "jar 已是最新，跳过打包"
             return 0
         fi
