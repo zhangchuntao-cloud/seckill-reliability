@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.hmdp</groupId>
-    <artifactId>hm-dianping</artifactId>
+    <artifactId>seckill-reliability</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>hm-dianping</name>
+    <name>seckill-reliability</name>
     <description>黑马点评 - 高并发秒杀</description>
     <properties>
         <java.version>17</java.version>

@@ -1,4 +1,7 @@
-# 黑马点评 —— 本地中间件一键启动
+# Compose 项目名。显式声明，避免将来目录改名导致数据卷被当成新项目。
+name: seckill-reliability
+
+# seckill-reliability —— 本地中间件一键启动
 #
 # 端口刻意错开本机原生服务（3306/6379/5672/15672），避免冲突：
 #   MySQL    3307 -> 3306
@@ -14,7 +17,7 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: dianping-mysql
+    container_name: seckill-mysql
     restart: unless-stopped
     ports:
       - "3307:3306"
@@ -39,7 +42,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: dianping-redis
+    container_name: seckill-redis
     restart: unless-stopped
     ports:
       - "6380:6379"
@@ -54,7 +57,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: dianping-rabbitmq
+    container_name: seckill-rabbitmq
     restart: unless-stopped
     ports:
       - "5673:5672"    # AMQP
@@ -79,7 +82,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.51.0
-    container_name: dianping-prometheus
+    container_name: seckill-prometheus
     restart: unless-stopped
     ports:
       - "9090:9090"    # http://localhost:9090
@@ -99,7 +102,7 @@ services:
 
   grafana:
     image: grafana/grafana:10.4.0
-    container_name: dianping-grafana
+    container_name: seckill-grafana
     restart: unless-stopped
     ports:
       - "3000:3000"    # http://localhost:3000
