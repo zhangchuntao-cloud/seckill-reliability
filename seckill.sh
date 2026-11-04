@@ -2,13 +2,13 @@
 #
 # 黑马点评 —— 一键启动 / 停止 / 查看状态
 #
-#   ./hmdp.sh start      启动中间件 + 应用
-#   ./hmdp.sh stop       停止应用 + 中间件
-#   ./hmdp.sh restart    重启
-#   ./hmdp.sh status     查看各组件状态
-#   ./hmdp.sh logs       跟踪应用日志
-#   ./hmdp.sh build      重新打包（改了 Java 代码后用）
-#   ./hmdp.sh clean      停止并清空所有数据卷（会重新导入建表脚本）
+#   ./seckill.sh start      启动中间件 + 应用
+#   ./seckill.sh stop       停止应用 + 中间件
+#   ./seckill.sh restart    重启
+#   ./seckill.sh status     查看各组件状态
+#   ./seckill.sh logs       跟踪应用日志
+#   ./seckill.sh build      重新打包（改了 Java 代码后用）
+#   ./seckill.sh clean      停止并清空所有数据卷（会重新导入建表脚本）
 #
 # 设计原则：
 #   - 幂等：重复执行 start 不会起第二份进程
@@ -23,7 +23,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 APP_PORT=8081
-JAR="target/hm-dianping-0.0.1-SNAPSHOT.jar"
+JAR="target/seckill-reliability-0.0.1-SNAPSHOT.jar"
 RUN_DIR=".run"
 PID_FILE="$RUN_DIR/hmdp.pid"
 APP_LOG="$RUN_DIR/app.log"
@@ -149,7 +149,7 @@ start_infra() {
         ok "数据库已就绪（$tables 张表）"
     else
         warn "数据库只有 $tables 张表（应为 11）。若是首次启动请再等几秒；"
-        warn "若持续如此，执行 ./hmdp.sh clean 重新初始化"
+        warn "若持续如此，执行 ./seckill.sh clean 重新初始化"
     fi
 }
 
@@ -217,8 +217,8 @@ print_urls() {
     printf "${C_GREEN}════════════════════════════════════════════════════${C_RESET}\n"
     echo
     printf "  压测：  ${C_DIM}python3 scripts/seckill-loadtest.py --users 300${C_RESET}\n"
-    printf "  日志：  ${C_DIM}./hmdp.sh logs${C_RESET}\n"
-    printf "  状态：  ${C_DIM}./hmdp.sh status${C_RESET}\n"
+    printf "  日志：  ${C_DIM}./seckill.sh logs${C_RESET}\n"
+    printf "  状态：  ${C_DIM}./seckill.sh status${C_RESET}\n"
     echo
 }
 

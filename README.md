@@ -1,3 +1,7 @@
+# Seckill Reliability
+
+> 仿大众点评的本地生活服务平台（Java / Spring Boot 3），核心是秒杀链路的可靠性工程
+
 ## 项目描述
 
 仿大众点评的本地生活服务平台（Java / Spring Boot），实现了短信登录、商户查询缓存、优惠券秒杀、附近商户、UV 统计、用户签到、好友关注、达人探店等功能。
@@ -62,7 +66,7 @@ Spring Boot 3.2 · JDK 17 · MySQL 8 · Redis · RabbitMQ · MyBatis-Plus · Red
 ## 快速开始
 
 ```bash
-./hmdp.sh start
+./seckill.sh start
 ```
 
 一条命令完成：检查 JDK 17 / Docker → 启动 5 个中间件 → 等待就绪 →
@@ -70,13 +74,13 @@ Spring Boot 3.2 · JDK 17 · MySQL 8 · Redis · RabbitMQ · MyBatis-Plus · Red
 
 | 命令 | 作用 |
 |---|---|
-| `./hmdp.sh start` | 一键启动（幂等，重复执行不会起第二份） |
-| `./hmdp.sh stop` | 停止应用和中间件（保留数据） |
-| `./hmdp.sh status` | 查看应用与各组件状态 |
-| `./hmdp.sh logs` | 跟踪应用日志 |
-| `./hmdp.sh restart` | 重启 |
-| `./hmdp.sh build` | 改完 Java 代码后重新打包 |
-| `./hmdp.sh clean` | 停止并清空数据卷（下次启动重新导入建表脚本） |
+| `./seckill.sh start` | 一键启动（幂等，重复执行不会起第二份） |
+| `./seckill.sh stop` | 停止应用和中间件（保留数据） |
+| `./seckill.sh status` | 查看应用与各组件状态 |
+| `./seckill.sh logs` | 跟踪应用日志 |
+| `./seckill.sh restart` | 重启 |
+| `./seckill.sh build` | 改完 Java 代码后重新打包 |
+| `./seckill.sh clean` | 停止并清空数据卷（下次启动重新导入建表脚本） |
 
 ### 手动启动（不想用脚本时）
 
