@@ -33,6 +33,8 @@ public class MvcConfig implements WebMvcConfigurer {
                         // 已下沉到 VoucherController 内部，只允许管理员调用。
                         "/voucher/**",
                         "/user/code",
+                        // 演示接口自己完成登录流程，无需拦截器提供用户上下文
+                        "/demo/**",
                         "/shop/**",
                         "/shop-type/**",
                         "/blog/hot"

@@ -84,6 +84,36 @@
   }
   footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--dim); font-size: 13px; }
   .dim { color: var(--dim); }
+
+  /* 下单演示面板 */
+  .demo { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+          background: var(--card); border: 1px solid var(--border);
+          border-radius: 10px; padding: 18px 20px; }
+  .demo label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--dim); }
+  .demo input {
+    background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--fg); padding: 8px 12px; font-size: 14px; width: 170px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .demo input:focus { outline: none; border-color: var(--accent); }
+  .demo button {
+    background: #238636; border: 1px solid #2ea043; color: #fff;
+    border-radius: 6px; padding: 9px 18px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background .15s;
+  }
+  .demo button:hover { background: #2ea043; }
+  .demo button:disabled { opacity: .5; cursor: not-allowed; }
+  .demo button.secondary { background: #21262d; border-color: var(--border); color: var(--fg); }
+  .demo button.secondary:hover { background: #30363d; }
+  .hint-line { font-size: 12px; color: var(--dim); margin-top: 10px; }
+  pre.result {
+    margin-top: 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px; font-size: 13px; line-height: 1.7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--dim); white-space: pre-wrap; word-break: break-all; min-height: 60px;
+  }
+  pre.result.ok { border-color: rgba(63,185,80,.4); }
+  pre.result.err { border-color: rgba(248,81,73,.4); }
 </style>
 </head>
 <body>
@@ -140,6 +170,22 @@
       <div class="note">请求线程上唯一的 Redis 往返</div>
     </div>
   </div>
+
+  <h2>试一次下单 <span class="hint">自动完成「发验证码 → 登录 → 抢购」</span></h2>
+  <div class="demo">
+    <label>手机号
+      <input id="demo-phone" value="13686869696" autocomplete="off">
+    </label>
+    <label>券 ID
+      <input id="demo-voucher" value="10" type="number" min="1">
+    </label>
+    <button id="demo-btn">抢购一次</button>
+    <button id="demo-reset" class="secondary">换一个用户</button>
+  </div>
+  <div class="hint-line">
+    同一个手机号第二次会被拒绝（一人一单）；点「换一个用户」会从库里取一个没用过的手机号。
+  </div>
+  <pre id="demo-result" class="result">点击上方按钮开始…</pre>
 
   <h2>服务入口</h2>
   <div class="grid cols-2">
@@ -305,6 +351,66 @@
   refreshMetrics();
   setInterval(checkHealth, 10000);
   setInterval(refreshMetrics, 3000);
+
+  // ---------------------------------------------------------------- 下单演示
+
+  var demoBtn = document.getElementById('demo-btn');
+  var demoReset = document.getElementById('demo-reset');
+  var demoResult = document.getElementById('demo-result');
+
+  function showResult(text, state) {
+    demoResult.textContent = text;
+    demoResult.className = 'result' + (state === true ? ' ok' : state === false ? ' err' : '');
+  }
+
+  demoBtn.addEventListener('click', function () {
+    var phone = document.getElementById('demo-phone').value.trim();
+    var voucherId = document.getElementById('demo-voucher').value.trim() || '10';
+    if (!phone) { showResult('请先填手机号', false); return; }
+
+    demoBtn.disabled = true;
+    showResult('请求中…', null);
+
+    fetch('/demo/seckill?phone=' + encodeURIComponent(phone) + '&voucherId=' + encodeURIComponent(voucherId),
+          { method: 'POST' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.success && j.data) {
+          var d = j.data;
+          var lines = ['✅ 抢购成功', '', '订单号  ' + d.orderId];
+          if (d.trace) {
+            lines.push('', '执行轨迹：');
+            Object.keys(d.trace).forEach(function (k) { lines.push('  • ' + k + '：' + d.trace[k]); });
+          }
+          showResult(lines.join('\n'), true);
+        } else {
+          showResult('❌ ' + (j.errorMsg || dmsg(j) || '失败'), false);
+        }
+        refreshMetrics();
+      })
+      .catch(function (e) { showResult('请求失败：' + e, false); })
+      .then(function () { demoBtn.disabled = false; });
+  });
+
+  demoReset.addEventListener('click', function () {
+    var voucherId = document.getElementById('demo-voucher').value.trim() || '10';
+    fetch('/demo/users?voucherId=' + encodeURIComponent(voucherId))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.success && j.data) {
+          document.getElementById('demo-phone').value = j.data.phone;
+          showResult('已切换到用户 ' + j.data.phone + '（id=' + j.data.userId + '）', null);
+        } else {
+          showResult(j.errorMsg || '没有可用用户了', false);
+        }
+      })
+      .catch(function (e) { showResult('请求失败：' + e, false); });
+  });
+
+  function dmsg(j) {
+    try { return j.data && j.data.errorMsg; } catch (e) { return null; }
+  }
+
   document.getElementById('footer-time').textContent = new Date().toLocaleString('zh-CN');
 })();
 </script>
