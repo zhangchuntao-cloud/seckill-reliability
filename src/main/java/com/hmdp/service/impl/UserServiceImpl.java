@@ -60,11 +60,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Result.fail("手机号格式错误");
         }
 
-        //3.符合，生成验证码
+        //3.发送频率限制：同一手机号 60 秒内只能发一次。
+        //   只靠验证码 2 分钟过期挡不住刷短信——每次调用都会覆盖旧码并触发一条新短信，
+        //   攻击者可以按任意速率刷同一个号码。用 setIfAbsent 原子占位，
+        //   并在 TTL 到期前拒绝重复发送。
+        String rateKey = RedisConstants.LOGIN_CODE_RATE_KEY + phone;
+        Boolean first = stringRedisTemplate.opsForValue()
+                .setIfAbsent(rateKey, "1", RedisConstants.LOGIN_CODE_RATE_TTL, TimeUnit.SECONDS);
+        if (!Boolean.TRUE.equals(first)) {
+            return Result.fail("验证码发送太频繁，请 " + RedisConstants.LOGIN_CODE_RATE_TTL + " 秒后再试");
+        }
+
+        //4.符合，生成验证码
         String code = RandomUtil.randomNumbers(6);
-        //4.保存验证码到redis
+        //5.保存验证码到redis
        stringRedisTemplate.opsForValue().set(RedisConstants.LOGIN_CODE_KEY +phone,code,2, TimeUnit.MINUTES);
-        //5.发送验证码
+        //6.发送验证码
         log.info("短信验证码发送成功：{}",code);
 
         return Result.ok();

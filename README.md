@@ -82,6 +82,12 @@ Spring Boot 3.2 · JDK 17 · MySQL 8 · Redis · RabbitMQ · MyBatis-Plus · Red
 | `./seckill.sh build` | 改完 Java 代码后重新打包 |
 | `./seckill.sh clean` | 停止并清空数据卷（下次启动重新导入建表脚本） |
 
+> **Windows（Git Bash / MSYS2）**：无需额外安装 `mvn`、`nc`、`mysql`、`redis-cli`。
+> 脚本会依次从 PATH、`./mvnw`、`~/.m2/wrapper`、IDEA 自带目录里找 Maven，
+> 端口探测改用 bash 内建 `/dev/tcp`，数据库与 Redis 检查走 `docker exec`，
+> 进程管理用 `jps` + `taskkill`。
+> 另外 `./seckill.sh build` 会先停应用再打包（Windows 上运行中的 jar 删不掉），打包完自动拉起。
+
 ### 手动启动（不想用脚本时）
 
 ```bash

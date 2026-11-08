@@ -3,6 +3,9 @@ package com.hmdp.utils;
 public class RedisConstants {
     public static final String LOGIN_CODE_KEY = "login:code:";
     public static final Long LOGIN_CODE_TTL = 2L;
+    /** 同一手机号发送验证码的最小间隔（秒），防止被刷短信 */
+    public static final String LOGIN_CODE_RATE_KEY = "login:code:rate:";
+    public static final Long LOGIN_CODE_RATE_TTL = 60L;
     public static final String LOGIN_USER_KEY = "login:token:";
     public static final Long LOGIN_USER_TTL = 36000L;
 

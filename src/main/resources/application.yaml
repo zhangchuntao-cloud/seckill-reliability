@@ -43,6 +43,12 @@ spring:
         # 而不是 Spring 的 RetryTemplate（后者与手动 ACK 组合是个坑）
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
+  servlet:
+    multipart:
+      # 上传图片的上限。Controller 里还有一道同样的校验，
+      # 这里先挡住，避免超大请求把内存/磁盘写满。
+      max-file-size: 5MB
+      max-request-size: 6MB
 mybatis-plus:
   type-aliases-package: com.hmdp.entity # 别名扫描包
 hmdp:

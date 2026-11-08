@@ -67,6 +67,7 @@ public class DemoController {
         Map<String, Object> trace = new LinkedHashMap<>();
 
         // 1. 发验证码（写入 Redis，同时会打到服务端日志）
+        clearSendCodeRateLimit(phone);
         Result codeResult = userService.sendCode(phone, null);
         if (Boolean.FALSE.equals(codeResult.getSuccess())) {
             return codeResult;
@@ -115,12 +116,22 @@ public class DemoController {
         }
     }
 
+    /**
+     * 演示接口常需要同一手机号连续调用（例如连续演示两次以展示「一人一单」），
+     * 验证码频控会先把第二次拦掉。这里清掉频控 key，只影响本地演示环境
+     * （{@code hmdp.demo.enabled=true}），不影响真实的发送限流逻辑。
+     */
+    private void clearSendCodeRateLimit(String phone) {
+        stringRedisTemplate.delete(RedisConstants.LOGIN_CODE_RATE_KEY + phone);
+    }
+
     /** 查询某手机号的登录 token（调试用：拿到 token 后可以自己用 curl 调秒杀接口） */
     @GetMapping("/token")
     public Result token(@RequestParam String phone) {
         if (!demoEnabled) {
             return Result.fail("演示接口已关闭");
         }
+        clearSendCodeRateLimit(phone);
         userService.sendCode(phone, null);
         String code = stringRedisTemplate.opsForValue().get(RedisConstants.LOGIN_CODE_KEY + phone);
         if (code == null) {
